@@ -1,0 +1,728 @@
+﻿<Fluent:RibbonWindow x:Class="Latex.MathIDE.MainWindow"
+                     x:ClassModifier="internal"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:l="clr-namespace:Latex.MathIDE"
+        xmlns:c="clr-namespace:Latex.MathIDE.Converters"
+        xmlns:Fluent="clr-namespace:Fluent;assembly=Fluent"
+        Title="LaTeX Math IDE 1.0 - BETA"
+        Icon="Images\icon.ico"
+		MinWidth="1024" MinHeight="700"
+        Width="1024" Height="700"
+        UseLayoutRounding="True"
+        Cursor="{Binding Path=ViewCursor}"
+        Closed="MainWindow_Closed">
+    <Window.Resources>
+        <c:IntegerConverter x:Key="integerConverter" />
+    </Window.Resources>
+    <Window.TaskbarItemInfo>
+        <TaskbarItemInfo ProgressState="{Binding Path=ProgressState}" ProgressValue="100" />
+    </Window.TaskbarItemInfo>
+    
+    <Fluent:RibbonWindow.CommandBindings>
+        <CommandBinding Command="Help" Executed="HelpCommand_Executed" />
+        <CommandBinding Command="SaveAs" CanExecute="SaveAsCommand_CanExecute" Executed="SaveCommand_Executed" />
+        <CommandBinding Command="l:Commands.Refresh" CanExecute="RefreshCommand_CanExecute" Executed="RefreshCommand_Executed" />
+        <CommandBinding Command="l:Commands.CopyResult" CanExecute="CopyResultCommand_CanExecute" Executed="CopyResultCommand_Executed" />
+        <CommandBinding Command="l:Commands.CopyInput" CanExecute="CopyInputCommand_CanExecute" Executed="CopyInputCommand_Executed" />
+        <CommandBinding Command="l:Commands.CopyWholeInput" CanExecute="CopyWholeInputCommand_CanExecute" Executed="CopyWholeInputCommand_Executed" />
+        <CommandBinding Command="l:Commands.AddSymbol" CanExecute="AddSymbolCommand_CanExecute" Executed="AddSymbolCommand_Executed" />
+    </Fluent:RibbonWindow.CommandBindings>
+    
+    <Fluent:RibbonWindow.InputBindings>
+        <KeyBinding Key="F5" Command="l:Commands.Refresh" />
+        <KeyBinding Key="S" Modifiers="Ctrl" Command="SaveAs" />
+    </Fluent:RibbonWindow.InputBindings>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Fluent:Ribbon Grid.Row="0" AutomaticStateManagement="True">
+            <Fluent:Ribbon.QuickAccessItems>
+                <Fluent:QuickAccessMenuItem IsChecked="True" IsCheckable="False">
+                    <Fluent:Button Header="Save As"
+                                   Command="SaveAs"
+                                   Icon="Images\save_as-16.png"/>
+                </Fluent:QuickAccessMenuItem>
+                <Fluent:QuickAccessMenuItem IsChecked="True" IsCheckable="False">
+                    <Fluent:Button Header="LaTeX Folder"                                   
+                                   Icon="Images\setting_tools-16.png"
+                                   Click="LaTeXFolderButton_Click" />
+                </Fluent:QuickAccessMenuItem>
+                <Fluent:QuickAccessMenuItem IsChecked="True" IsCheckable="False">
+                    <Fluent:Button Header="Help"
+                                   Command="Help"
+                                   Icon="Images\help-16.png"/>
+                </Fluent:QuickAccessMenuItem>
+            </Fluent:Ribbon.QuickAccessItems>
+            <Fluent:RibbonTabItem Header="Main">
+                <Fluent:RibbonGroupBox Header="Operations">
+                    <Fluent:Button Header="Refresh"
+                                   Command="l:Commands.Refresh"
+                                   LargeIcon="Images\update.png" />
+                    <Fluent:SplitButton Header="Copy"
+                                        Command="l:Commands.CopyResult"
+                                        LargeIcon="Images\document_export.png">
+                        <Fluent:MenuItem Header="Output"
+                                         Command="l:Commands.CopyResult"
+                                         Icon="Images\document_yellow.png"/>
+                        <Fluent:MenuItem Header="Input" 
+                                         Command="l:Commands.CopyInput"
+                                         Icon="Images\page.png"/>
+                        <Fluent:MenuItem Header="Whole document"
+                                         Command="l:Commands.CopyWholeInput"
+                                         Icon="Images\page_attach.png"/>
+                    </Fluent:SplitButton>
+
+                </Fluent:RibbonGroupBox>
+                <Fluent:RibbonGroupBox Header="Settings">
+                    <Fluent:CheckBox Header="Auto Refresh" 
+                                     x:Name="autoRefreshCheckBox"
+                                     IsChecked="{Binding Path=ConfigurationEntry.AutoRefresh}"
+                                     Checked="autoRefreshCheckBox_Checked"
+                                     Unchecked="autoRefreshCheckBox_Unchecked"/>
+                    <Fluent:ComboBox Header="Resolution" IsReadOnly="True"
+                                     x:Name="resolutionComboBox"
+                                     ItemsSource="{Binding Path=Resolutions}"
+                                     SelectedValue="{Binding Path=Resolution}"
+                                     SelectionChanged="resolutionComboBox_SelectionChanged"/>
+                </Fluent:RibbonGroupBox>
+                <Fluent:RibbonGroupBox Header="Common"
+                                       IsEnabled="{Binding Path=ConfigurationEntry.IsLaTeXFound, UpdateSourceTrigger=PropertyChanged}">
+                    <Fluent:Button Command="l:Commands.AddSymbol"
+                                   CommandParameter="\frac{x}{y}"
+                                   Header="Fraction"
+                                   LargeIcon="Images\Symbols\frac.png" />
+                    <Fluent:Button Command="l:Commands.AddSymbol"
+                                   CommandParameter="\sqrt{x}"
+                                   Header="Square Root"
+                                   LargeIcon="Images\Symbols\sqrt.png" />
+                    <Fluent:Button Command="l:Commands.AddSymbol"
+                                   CommandParameter="\lim_{x \rightarrow \infty}"
+                                   Header="Limit"
+                                   LargeIcon="Images\Symbols\lim.png" />
+                    <Fluent:Button Command="l:Commands.AddSymbol"
+                                   CommandParameter="\sum"
+                                   Header="Sum"
+                                   LargeIcon="Images\Symbols\sum.png" />
+                    <Fluent:Button Command="l:Commands.AddSymbol"
+                                   CommandParameter="\prod"
+                                   Header="Product"
+                                   LargeIcon="Images\Symbols\prod.png" />
+                </Fluent:RibbonGroupBox>
+                <Fluent:RibbonGroupBox Header="Delimiters"
+                                       IsEnabled="{Binding Path=ConfigurationEntry.IsLaTeXFound, UpdateSourceTrigger=PropertyChanged}">
+                    <Fluent:InRibbonGallery SnapsToDevicePixels="True" Selectable="False">
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="|" Width="32" Height="32">
+                            <Image Source="Images\Symbols\_vline_.png" Width="3" Height="30" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\|" Width="32" Height="32">
+                            <Image Source="Images\Symbols\double_vline_.png" Width="9" Height="29" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="/" Width="32" Height="32">
+                            <Image Source="Images\Symbols\_fslash_.png" Width="13" Height="30" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\backslash" Width="32" Height="32">
+                            <Image Source="Images\Symbols\backslash.png" Width="13" Height="30" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="(" Width="32" Height="32">
+                            <Image Source="Images\Symbols\_obacket1_.png" Width="9" Height="29" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter=")" Width="32" Height="32">
+                            <Image Source="Images\Symbols\_cbacket1_.png" Width="9" Height="29" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="[" Width="32" Height="32">
+                            <Image Source="Images\Symbols\_obacket2_.png" Width="6" Height="30" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="]" Width="32" Height="32">
+                            <Image Source="Images\Symbols\_cbacket2_.png" Width="6" Height="30" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\{" Width="32" Height="32">
+                            <Image Source="Images\Symbols\_obacket3_.png" Width="12" Height="30" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\}" Width="32" Height="32">
+                            <Image Source="Images\Symbols\_cbacket3_.png" Width="12" Height="30" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\langle" Width="32" Height="32">
+                            <Image Source="Images\Symbols\langle.png" Width="8" Height="29" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\rangle" Width="32" Height="32">
+                            <Image Source="Images\Symbols\rangle.png" Width="8" Height="29" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\lceil" Width="32" Height="32">
+                            <Image Source="Images\Symbols\lceil.png" Width="9" Height="29" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\rceil" Width="32" Height="32">
+                            <Image Source="Images\Symbols\rceil.png" Width="9" Height="29" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\lfloor" Width="32" Height="32">
+                            <Image Source="Images\Symbols\lfloor.png" Width="9" Height="29" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\rfloor" Width="32" Height="32">
+                            <Image Source="Images\Symbols\rfloor.png" Width="9" Height="29" />
+                        </Fluent:GalleryItem>
+                    </Fluent:InRibbonGallery>
+                </Fluent:RibbonGroupBox>
+                <Fluent:RibbonGroupBox Header="Greek Letters"
+                                       IsEnabled="{Binding Path=ConfigurationEntry.IsLaTeXFound, UpdateSourceTrigger=PropertyChanged}">
+                    <Fluent:InRibbonGallery SnapsToDevicePixels="True" Selectable="False" >
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\alpha" Width="32" Height="32">
+                            <Image Source="Images\Symbols\alpha.png" Width="21" Height="17" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\beta" Width="32" Height="32">
+                            <Image Source="Images\Symbols\beta.png" Width="20" Height="32" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\gamma" Width="32" Height="32">
+                            <Image Source="Images\Symbols\gamma.png" Width="20" Height="24" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\delta" Width="32" Height="32">
+                            <Image Source="Images\Symbols\delta.png" Width="16" Height="26" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\epsilon" Width="32" Height="32">
+                            <Image Source="Images\Symbols\epsilon.png" Width="13" Height="16" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\varepsilon" Width="32" Height="32">
+                            <Image Source="Images\Symbols\varepsilon.png" Width="16" Height="17" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\zeta" Width="32" Height="32">
+                            <Image Source="Images\Symbols\zeta.png" Width="17" Height="31" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\eta" Width="32" Height="32">
+                            <Image Source="Images\Symbols\eta.png" Width="17" Height="24" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\theta" Width="32" Height="32">
+                            <Image Source="Images\Symbols\theta.png" Width="16" Height="26" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\vartheta" Width="32" Height="32">
+                            <Image Source="Images\Symbols\vartheta.png" Width="20" Height="26" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\kappa" Width="32" Height="32">
+                            <Image Source="Images\Symbols\kappa.png" Width="18" Height="17" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\lambda" Width="32" Height="32">
+                            <Image Source="Images\Symbols\lambda.png" Width="18" Height="25" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\mu" Width="32" Height="32">
+                            <Image Source="Images\Symbols\mu.png" Width="20" Height="24" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\nu" Width="32" Height="32">
+                            <Image Source="Images\Symbols\nu.png" Width="18" Height="16" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\xi" Width="32" Height="32">
+                            <Image Source="Images\Symbols\xi.png" Width="17" Height="31" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\pi" Width="32" Height="32">
+                            <Image Source="Images\Symbols\pi.png" Width="20" Height="16" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\varpi" Width="32" Height="32">
+                            <Image Source="Images\Symbols\varpi.png" Width="28" Height="16" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\rho" Width="32" Height="32">
+                            <Image Source="Images\Symbols\rho.png" Width="18" Height="24" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\varrho" Width="32" Height="32">
+                            <Image Source="Images\Symbols\varrho.png" Width="17" Height="23" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\sigma" Width="32" Height="32">
+                            <Image Source="Images\Symbols\sigma.png" Width="20" Height="16" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\varsigma" Width="32" Height="32">
+                            <Image Source="Images\Symbols\varsigma.png" Width="14" Height="20" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\tau" Width="32" Height="32">
+                            <Image Source="Images\Symbols\tau.png" Width="18" Height="16" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\upsilon" Width="32" Height="32">
+                            <Image Source="Images\Symbols\upsilon.png" Width="18" Height="17" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\phi" Width="32" Height="32">
+                            <Image Source="Images\Symbols\phi.png" Width="20" Height="31" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\varphi" Width="32" Height="32">
+                            <Image Source="Images\Symbols\varphi.png" Width="22" Height="24" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\chi" Width="32" Height="32">
+                            <Image Source="Images\Symbols\chi.png" Width="21" Height="23" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\psi" Width="32" Height="32">
+                            <Image Source="Images\Symbols\psi.png" Width="22" Height="31" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\omega" Width="32" Height="32">
+                            <Image Source="Images\Symbols\omega.png" Width="22" Height="17" />
+                        </Fluent:GalleryItem>
+                        
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\Gamma" Width="32" Height="32">
+                            <Image Source="Images\Symbols\_gamma.png" Width="20" Height="24" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\Delta" Width="32" Height="32">
+                            <Image Source="Images\Symbols\_delta.png" Width="27" Height="25" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\Theta" Width="32" Height="32">
+                            <Image Source="Images\Symbols\_theta.png" Width="24" Height="26" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\Lambda" Width="32" Height="32">
+                            <Image Source="Images\Symbols\_lambda.png" Width="23" Height="25" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\Xi" Width="32" Height="32">
+                            <Image Source="Images\Symbols\_xi.png" Width="22" Height="24" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\Pi" Width="32" Height="32">
+                            <Image Source="Images\Symbols\_pi.png" Width="25" Height="24" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\Sigma" Width="32" Height="32">
+                            <Image Source="Images\Symbols\_sigma.png" Width="22" Height="24" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\Upsilon" Width="32" Height="32">
+                            <Image Source="Images\Symbols\_upsilon.png" Width="24" Height="25" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\Phi" Width="32" Height="32">
+                            <Image Source="Images\Symbols\_phi.png" Width="22" Height="24" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\Psi" Width="32" Height="32">
+                            <Image Source="Images\Symbols\_psi.png" Width="24" Height="24" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\Omega" Width="32" Height="32">
+                            <Image Source="Images\Symbols\_omega.png" Width="24" Height="25" />
+                        </Fluent:GalleryItem>
+                    </Fluent:InRibbonGallery>
+                </Fluent:RibbonGroupBox>
+            </Fluent:RibbonTabItem>
+            <Fluent:RibbonTabItem Header="Arrows, Relations and Sets">
+                <Fluent:RibbonGroupBox Header="Arrows"
+                                       IsEnabled="{Binding Path=ConfigurationEntry.IsLaTeXFound, UpdateSourceTrigger=PropertyChanged}">
+                    <Fluent:InRibbonGallery SnapsToDevicePixels="True" Selectable="False">
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\rightarrow" Width="32" Height="32">
+                            <Image Source="Images\Symbols\rightarrow.png" Width="32" Height="19" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\leftarrow" Width="32" Height="32">
+                            <Image Source="Images\Symbols\leftarrow.png" Width="32" Height="19" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\mapsto" Width="32" Height="32">
+                            <Image Source="Images\Symbols\mapsto.png" Width="32" Height="19" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\implies" Width="64" Height="32">
+                            <Image Source="Images\Symbols\implies.png" Width="53" Height="20" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\Rightarrow" Width="32" Height="32">
+                            <Image Source="Images\Symbols\_rightarrow.png" Width="32" Height="20" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\iff" Width="32" Height="32">
+                            <Image Source="Images\Symbols\iff.png" Width="61" Height="20" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\leftrightarrow" Width="32" Height="32">
+                            <Image Source="Images\Symbols\leftrightarrow.png" Width="32" Height="19" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\Leftrightarrow" Width="32" Height="32">
+                            <Image Source="Images\Symbols\_leftrightarrow.png" Width="33" Height="20" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\uparrow" Width="32" Height="32">
+                            <Image Source="Images\Symbols\uparrow.png" Width="18" Height="31" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\Uparrow" Width="32" Height="32">
+                            <Image Source="Images\Symbols\_uparrow.png" Width="21" Height="31" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\downarrow" Width="32" Height="32">
+                            <Image Source="Images\Symbols\downarrow.png" Width="18" Height="31" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\Downarrow" Width="32" Height="32">
+                            <Image Source="Images\Symbols\_downarrow.png" Width="21" Height="31" />
+                        </Fluent:GalleryItem>
+
+                    </Fluent:InRibbonGallery>
+                </Fluent:RibbonGroupBox>
+                <Fluent:RibbonGroupBox Header="Relations"
+                                       IsEnabled="{Binding Path=ConfigurationEntry.IsLaTeXFound, UpdateSourceTrigger=PropertyChanged}">
+                    <Fluent:InRibbonGallery SnapsToDevicePixels="True" Selectable="False">
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="&lt;" Width="32" Height="32">
+                            <Image Source="Images\Symbols\_less_.png" Width="23" Height="21" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="&gt;" Width="32" Height="32">
+                            <Image Source="Images\Symbols\_more_.png" Width="23" Height="21" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\leq" Width="32" Height="32">
+                            <Image Source="Images\Symbols\leq.png" Width="23" Height="28" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\geq" Width="32" Height="32">
+                            <Image Source="Images\Symbols\geq.png" Width="23" Height="28" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\ll" Width="32" Height="32">
+                            <Image Source="Images\Symbols\ll.png" Width="32" Height="23" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\gg" Width="32" Height="32">
+                            <Image Source="Images\Symbols\gg.png" Width="32" Height="23" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\prec" Width="32" Height="32">
+                            <Image Source="Images\Symbols\prec.png" Width="23" Height="21" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\succ" Width="32" Height="32">
+                            <Image Source="Images\Symbols\succ.png" Width="23" Height="21" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\preceq" Width="32" Height="32">
+                            <Image Source="Images\Symbols\preceq.png" Width="23" Height="28" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\succeq" Width="32" Height="32">
+                            <Image Source="Images\Symbols\succeq.png" Width="23" Height="28" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="=" Width="32" Height="32">
+                            <Image Source="Images\Symbols\=.png" Width="24" Height="9" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\doteq" Width="32" Height="32">
+                            <Image Source="Images\Symbols\doteq.png" Width="24" Height="20" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\equiv" Width="32" Height="32">
+                            <Image Source="Images\Symbols\equiv.png" Width="24" Height="16" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\approx" Width="32" Height="32">
+                            <Image Source="Images\Symbols\approx.png" Width="24" Height="16" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\cong" Width="32" Height="32">
+                            <Image Source="Images\Symbols\cong.png" Width="24" Height="20" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\simeq" Width="32" Height="32">
+                            <Image Source="Images\Symbols\simeq.png" Width="24" Height="15" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\sim" Width="32" Height="32">
+                            <Image Source="Images\Symbols\sim.png" Width="24" Height="9" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\propto" Width="32" Height="32">
+                            <Image Source="Images\Symbols\propto.png" Width="24" Height="17" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\neq" Width="32" Height="32">
+                            <Image Source="Images\Symbols\neq.png" Width="24" Height="32" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\parallel" Width="32" Height="32">
+                            <Image Source="Images\Symbols\parallel.png" Width="9" Height="29" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\nparallel" Width="32" Height="32">
+                            <Image Source="Images\Symbols\nparallel.png" Width="17" Height="29" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\asymp" Width="32" Height="32">
+                            <Image Source="Images\Symbols\asymp.png" Width="24" Height="17" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\bowtie" Width="32" Height="32">
+                            <Image Source="Images\Symbols\bowtie.png" Width="28" Height="18" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\vdash" Width="32" Height="32">
+                            <Image Source="Images\Symbols\vdash.png" Width="18" Height="24" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\dashv" Width="32" Height="32">
+                            <Image Source="Images\Symbols\dashv.png" Width="18" Height="24" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\smile" Width="32" Height="32">
+                            <Image Source="Images\Symbols\smile.png" Width="32" Height="9" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\frown" Width="32" Height="32">
+                            <Image Source="Images\Symbols\frown.png" Width="32" Height="10" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\models" Width="32" Height="32">
+                            <Image Source="Images\Symbols\models.png" Width="23" Height="30" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\mid" Width="32" Height="32">
+                            <Image Source="Images\Symbols\mid.png" Width="3" Height="30" />
+                        </Fluent:GalleryItem>
+                    </Fluent:InRibbonGallery>
+                </Fluent:RibbonGroupBox>
+                <Fluent:RibbonGroupBox Header="Sets and Logic"
+                                       IsEnabled="{Binding Path=ConfigurationEntry.IsLaTeXFound, UpdateSourceTrigger=PropertyChanged}">
+                     <Fluent:InRibbonGallery SnapsToDevicePixels="True" Selectable="False">
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\exists" Width="32" Height="32">
+                            <Image Source="Images\Symbols\exists.png" Width="16" Height="24" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\nexists" Width="32" Height="32">
+                            <Image Source="Images\Symbols\nexists.png" Width="16" Height="36" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\forall" Width="32" Height="32">
+                            <Image Source="Images\Symbols\forall.png" Width="20" Height="25" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\neg" Width="32" Height="32">
+                            <Image Source="Images\Symbols\neg.png" Width="20" Height="10" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\subset" Width="32" Height="32">
+                            <Image Source="Images\Symbols\subset.png" Width="23" Height="21" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\supset" Width="32" Height="32">
+                            <Image Source="Images\Symbols\supset.png" Width="23" Height="21" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\subseteq" Width="32" Height="32">
+                            <Image Source="Images\Symbols\subseteq.png" Width="23" Height="28" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\supseteq" Width="32" Height="32">
+                            <Image Source="Images\Symbols\supseteq.png" Width="23" Height="28" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\sqsubset" Width="32" Height="32">
+                            <Image Source="Images\Symbols\sqsubset.png" Width="23" Height="21" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\sqsupset" Width="32" Height="32">
+                            <Image Source="Images\Symbols\sqsupset.png" Width="24" Height="21" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\sqsubseteq" Width="32" Height="32">
+                            <Image Source="Images\Symbols\sqsubseteq.png" Width="24" Height="28" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\sqsupseteq" Width="32" Height="32">
+                            <Image Source="Images\Symbols\sqsupseteq.png" Width="23" Height="28" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\cap" Width="32" Height="32">
+                            <Image Source="Images\Symbols\cap.png" Width="20" Height="22" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\cup" Width="32" Height="32">
+                            <Image Source="Images\Symbols\cup.png" Width="20" Height="22" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\uplus" Width="32" Height="32">
+                            <Image Source="Images\Symbols\uplus.png" Width="20" Height="22" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\sqcap" Width="32" Height="32">
+                            <Image Source="Images\Symbols\sqcap.png" Width="20" Height="21" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\sqcup" Width="32" Height="32">
+                            <Image Source="Images\Symbols\sqcup.png" Width="20" Height="21" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\in" Width="32" Height="32">
+                            <Image Source="Images\Symbols\in.png" Width="19" Height="21" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\notin" Width="32" Height="32">
+                            <Image Source="Images\Symbols\notin.png" Width="19" Height="35" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\ni" Width="32" Height="32">
+                            <Image Source="Images\Symbols\ni.png" Width="19" Height="21" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\land" Width="32" Height="32">
+                            <Image Source="Images\Symbols\land.png" Width="20" Height="22" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\lor" Width="32" Height="32">
+                            <Image Source="Images\Symbols\lor.png" Width="20" Height="22" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\emptyset" Width="32" Height="32">
+                            <Image Source="Images\Symbols\emptyset.png" Width="16" Height="30" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\varnothing" Width="32" Height="32">
+                            <Image Source="Images\Symbols\varnothing.png" Width="24" Height="21" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\top" Width="32" Height="32">
+                            <Image Source="Images\Symbols\top.png" Width="24" Height="23" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\bot" Width="32" Height="32">
+                            <Image Source="Images\Symbols\bot.png" Width="24" Height="23" />
+                        </Fluent:GalleryItem>
+
+                    </Fluent:InRibbonGallery>
+                </Fluent:RibbonGroupBox>
+            </Fluent:RibbonTabItem>
+            <Fluent:RibbonTabItem Header="Binary Operations, Trigonometric Functions and Miscellaneous">
+                <Fluent:RibbonGroupBox Header="Binary Operations"
+                                       IsEnabled="{Binding Path=ConfigurationEntry.IsLaTeXFound, UpdateSourceTrigger=PropertyChanged}">
+                    <Fluent:InRibbonGallery SnapsToDevicePixels="True" Selectable="False">
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\pm" Width="32" Height="32">
+                            <Image Source="Images\Symbols\pm.png" Width="24" Height="23" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\mp" Width="32" Height="32">
+                            <Image Source="Images\Symbols\mp.png" Width="24" Height="24" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\times" Width="32" Height="32">
+                            <Image Source="Images\Symbols\times.png" Width="18" Height="17" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\div" Width="32" Height="32">
+                            <Image Source="Images\Symbols\div.png" Width="24" Height="20" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\ast" Width="32" Height="32">
+                            <Image Source="Images\Symbols\ast.png" Width="14" Height="15" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\star" Width="32" Height="32">
+                            <Image Source="Images\Symbols\star.png" Width="19" Height="17" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\dagger" Width="32" Height="32">
+                            <Image Source="Images\Symbols\dagger.png" Width="12" Height="28" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\ddagger" Width="32" Height="32">
+                            <Image Source="Images\Symbols\ddagger.png" Width="12" Height="27" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\cdot" Width="32" Height="32">
+                            <Image Source="Images\Symbols\cdot.png" Width="6" Height="4" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\diamond" Width="32" Height="32">
+                            <Image Source="Images\Symbols\diamond.png" Width="18" Height="17" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\bigtriangleup" Width="32" Height="32">
+                            <Image Source="Images\Symbols\bigtriangleup.png" Width="28" Height="25" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\bigtriangledown" Width="32" Height="32">
+                            <Image Source="Images\Symbols\bigtriangledown.png" Width="28" Height="26" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\triangleleft" Width="32" Height="32">
+                            <Image Source="Images\Symbols\triangleleft.png" Width="16" Height="18" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\triangleright" Width="32" Height="32">
+                            <Image Source="Images\Symbols\triangleright.png" Width="16" Height="18" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\bigcirc" Width="32" Height="32">
+                            <Image Source="Images\Symbols\bigcirc.png" Width="28" Height="28" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\bullet" Width="32" Height="32">
+                            <Image Source="Images\Symbols\bullet.png" Width="14" Height="14" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\wr" Width="32" Height="32">
+                            <Image Source="Images\Symbols\wr.png" Width="8" Height="24" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\oplus" Width="32" Height="32">
+                            <Image Source="Images\Symbols\oplus.png" Width="24" Height="24" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\ominus" Width="32" Height="32">
+                            <Image Source="Images\Symbols\ominus.png" Width="24" Height="24" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\otimes" Width="32" Height="32">
+                            <Image Source="Images\Symbols\otimes.png" Width="24" Height="24" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\oslash" Width="32" Height="32">
+                            <Image Source="Images\Symbols\oslash.png" Width="24" Height="24" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\odot" Width="32" Height="32">
+                            <Image Source="Images\Symbols\odot.png" Width="24" Height="24" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\circ" Width="32" Height="32">
+                            <Image Source="Images\Symbols\circ.png" Width="14" Height="14" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\setminus" Width="32" Height="32">
+                            <Image Source="Images\Symbols\setminus.png" Width="13" Height="30" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\amalg" Width="32" Height="32">
+                            <Image Source="Images\Symbols\amalg.png" Width="25" Height="24" />
+                        </Fluent:GalleryItem>
+                    </Fluent:InRibbonGallery>
+                </Fluent:RibbonGroupBox>
+                <Fluent:RibbonGroupBox Header="Miscellaneous"
+                                       IsEnabled="{Binding Path=ConfigurationEntry.IsLaTeXFound, UpdateSourceTrigger=PropertyChanged}">
+                     <Fluent:InRibbonGallery SnapsToDevicePixels="True" Selectable="False">
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\partial" Width="32" Height="32">
+                            <Image Source="Images\Symbols\partial.png" Width="20" Height="26" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\eth" Width="32" Height="32">
+                            <Image Source="Images\Symbols\eth.png" Width="18" Height="26" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\hbar" Width="32" Height="32">
+                            <Image Source="Images\Symbols\hbar.png" Width="18" Height="25" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\imath" Width="32" Height="32">
+                            <Image Source="Images\Symbols\imath.png" Width="10" Height="17" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\jmath" Width="32" Height="32">
+                            <Image Source="Images\Symbols\jmath.png" Width="15" Height="23" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\ell" Width="32" Height="32">
+                            <Image Source="Images\Symbols\ell.png" Width="15" Height="26" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\Re" Width="32" Height="32">
+                            <Image Source="Images\Symbols\_re.png" Width="25" Height="26" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\Im" Width="32" Height="32">
+                            <Image Source="Images\Symbols\_im.png" Width="23" Height="26" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\int" Width="32" Height="32">
+                            <Image Source="Images\Symbols\int.png" Width="12" Height="30" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\wp" Width="32" Height="32">
+                            <Image Source="Images\Symbols\wp.png" Width="21" Height="24" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\nabla" Width="32" Height="32">
+                            <Image Source="Images\Symbols\nabla.png" Width="27" Height="25" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\Box" Width="32" Height="32">
+                            <Image Source="Images\Symbols\_box.png" Width="24" Height="24" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\infty" Width="32" Height="32">
+                            <Image Source="Images\Symbols\infty.png" Width="30" Height="16" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\aleph" Width="32" Height="32">
+                            <Image Source="Images\Symbols\aleph.png" Width="18" Height="24" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\beth" Width="32" Height="32">
+                            <Image Source="Images\Symbols\beth.png" Width="25" Height="28" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\gimel" Width="32" Height="32">
+                            <Image Source="Images\Symbols\gimel.png" Width="16" Height="29" />
+                        </Fluent:GalleryItem>
+                    </Fluent:InRibbonGallery>
+                </Fluent:RibbonGroupBox>
+                <Fluent:RibbonGroupBox Header="Trigonometric Functions"
+                                       IsEnabled="{Binding Path=ConfigurationEntry.IsLaTeXFound, UpdateSourceTrigger=PropertyChanged}">
+                    <Fluent:InRibbonGallery SnapsToDevicePixels="True" Selectable="False">
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\sin" Width="32" Height="32">
+                            <Image Source="Images\Symbols\sin.png" Width="26" Height="15" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\cos" Width="32" Height="32">
+                            <Image Source="Images\Symbols\cos.png" Width="28" Height="11" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\tan" Width="32" Height="32">
+                            <Image Source="Images\Symbols\tan.png" Width="30" Height="14" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\cot" Width="32" Height="32">
+                            <Image Source="Images\Symbols\cot.png" Width="27" Height="14" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\arcsin" Width="64" Height="32">
+                            <Image Source="Images\Symbols\arcsin.png" Width="53" Height="15" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\arccos" Width="64" Height="32">
+                            <Image Source="Images\Symbols\arccos.png" Width="56" Height="11" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\arctan" Width="64" Height="32">
+                            <Image Source="Images\Symbols\arctan.png" Width="57" Height="14" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\sinh" Width="64" Height="32">
+                            <Image Source="Images\Symbols\sinh.png" Width="38" Height="16" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\cosh" Width="64" Height="32">
+                            <Image Source="Images\Symbols\cosh.png" Width="39" Height="16" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\tanh" Width="64" Height="32">
+                            <Image Source="Images\Symbols\tanh.png" Width="42" Height="16" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\coth" Width="64" Height="32">
+                            <Image Source="Images\Symbols\coth.png" Width="39" Height="16" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\sec" Width="32" Height="32">
+                            <Image Source="Images\Symbols\sec.png" Width="27" Height="11" />
+                        </Fluent:GalleryItem>
+                        <Fluent:GalleryItem Command="l:Commands.AddSymbol" CommandParameter="\csc" Width="32" Height="32">
+                            <Image Source="Images\Symbols\csc.png" Width="27" Height="11" />
+                        </Fluent:GalleryItem>
+                    </Fluent:InRibbonGallery>
+                </Fluent:RibbonGroupBox>
+            </Fluent:RibbonTabItem>
+        </Fluent:Ribbon>
+
+	    <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="7*"/>
+                <RowDefinition Height="3*"/>
+            </Grid.RowDefinitions>
+            <ScrollViewer Grid.Row="0"
+                          HorizontalScrollBarVisibility="Auto" 
+                          VerticalScrollBarVisibility="Auto"
+                          Background="White">
+                <Image Source="{Binding Path=ResultImage}" 
+                       SnapsToDevicePixels="True" Stretch="None"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </ScrollViewer>
+            <TextBox Grid.Row="1" x:Name="inputTextBox"
+                     IsEnabled="{Binding Path=ConfigurationEntry.IsLaTeXFound, UpdateSourceTrigger=PropertyChanged}"
+                     Text="{Binding Path=TextInput, UpdateSourceTrigger=PropertyChanged}"
+                     AcceptsReturn="True" FontFamily="Consolas" FontSize="16" 
+                     KeyUp="inputTextBox_KeyUp" />
+        </Grid>
+        <Fluent:StatusBar Grid.Row="2" Height="28"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Bottom">    
+            <Fluent:StatusBarItem Value="{Binding Path=StatusString, StringFormat=Status: {0}}"
+                                  ToolTip="Current status"
+                                  HorizontalAlignment="Left"
+                                  VerticalAlignment="Center" />
+            <Fluent:StatusBarItem HorizontalAlignment="Right"
+                                  Cursor="Hand"
+                                  MouseDown="donateStatusBarItem_MouseDown">
+                <Image Source="Images\btn_donate_SM.gif" />
+            </Fluent:StatusBarItem>
+        </Fluent:StatusBar>
+    </Grid>
+</Fluent:RibbonWindow>
