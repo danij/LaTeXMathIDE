@@ -332,7 +332,7 @@ namespace Latex.MathIDE
         {
             try
             {
-                Process.Start(@"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=PD5LSZ9XBW6UU");
+                Process.Start(@"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WQQ9XBUKJ4WTN");
             }
             catch (Exception) { }
             e.Handled = true;
