@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LatexMathIDE", "LatexMathIDE\LatexMathIDE.csproj", "{B68AF757-04D9-4806-9C5F-4CA6C2AF2D43}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Latex", "Latex\Latex.csproj", "{2360B12A-5926-48B5-8AE8-D262C03A9D8C}"
