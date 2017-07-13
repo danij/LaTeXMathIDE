@@ -8,6 +8,13 @@ Copyright (C) Dani Jurcau 2013
 
 Using icons from http://www.fatcow.com/free-icons
 
+![Screenshot](doc/screenshot1.png)
+
+![Screenshot](doc/screenshot2.png)
+
+![Screenshot](doc/screenshot3.png)
+
+
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
